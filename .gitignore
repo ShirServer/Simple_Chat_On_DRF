@@ -1,0 +1,5 @@
+venv
+DRF_Chat_Api/DRF_Chat_Api/__pycache__
+DRF_Chat_Api/Chat/migrations
+DRF_Chat_Api/db.sqlite3
+DRF_Chat_Api/Chat/__pycache__
