@@ -23,23 +23,29 @@ class ChatViewSet(viewsets.ViewSet):
 
     def list(self, request):
         User_to_Chats_of_user = User_to_Chat.objects.filter(user=request.user)
-        Chats_of_user = []
         for i in User_to_Chats_of_user:
-            Chats_of_user.append(i.chat)
-        return Response({"chats": ChatSerializer(Chats_of_user, many=True).data,
-                         "chat_list": User_to_ChatSerializer(User_to_Chats_of_user, many=True).data})
+            if i.chat.is_private:
+
+                AnoverUserOfPrivateChat = User_to_Chat.objects.filter(
+                    chat=i.chat).exclude(user=request.user)[0].user
+
+                i.chat.avatar = AnoverUserOfPrivateChat.avatar
+                i.chat.name = AnoverUserOfPrivateChat.username
+
+        return Response({"chat_list": User_to_ChatDepthSerializer(User_to_Chats_of_user, many=True).data})
 
     def create(self, request):
+        chat = ChatSerializer(data=request.data)
+        chat.is_valid(raise_exception=True)
+        chat.save()
 
-        if (request.data["is_private"] == 'true'):
-            with_user = User.objects.get(username=request.data["with_user"])
-            if (with_user == None):  # private
-                return Response({"error": "Object does not exists"})
+        if (chat.data["is_private"]):
+            with_user = User.objects.filter(
+                username=request.data["with_user"])
+            if (len(with_user) == 0):  # private
+                return Response({"error": "User does not exists"})
             else:
-
-                chat = ChatSerializer(data={"is_private": True})
-                chat.is_valid(raise_exception=True)
-                chat.save()
+                with_user = with_user[0]
 
                 User_to_Chat_for_user_1 = User_to_ChatSerializer(
                     data={"user": request.user.id, "chat": chat.data['id'], "is_admin": True})
@@ -55,12 +61,7 @@ class ChatViewSet(viewsets.ViewSet):
                                  'User_to_Chat1': User_to_Chat_for_user_1.data,
                                  'User_to_Chat2': User_to_Chat_for_user_2.data})
 
-        elif (request.data["is_private"] == 'false'):
-            chat = ChatSerializer(
-                data=request.data)
-            chat.is_valid(raise_exception=True)
-            chat.save()
-
+        else:
             User_to_Chat_for_user_1 = User_to_ChatSerializer(
                 data={"user": request.user.id, "chat": chat.data['id'], "is_admin": True})
             User_to_Chat_for_user_1.is_valid(raise_exception=True)
