@@ -25,7 +25,7 @@ class ChatSerializer(serializers.ModelSerializer):
 
 class PublicUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = settings.AUTH_USER_MODEL
+        model = User
         fields = ['id', 'username', 'bio', 'location', 'birth_date', 'avatar']
 
 
@@ -45,3 +45,14 @@ class User_to_ChatDepthSerializer(serializers.ModelSerializer):
         model = User_to_Chat
         fields = '__all__'
         read_only_fields = ("id", )
+
+
+class User_to_ChatDepthUserSerializer(serializers.ModelSerializer):
+    chat = ChatSerializer()
+    user = PublicUserSerializer()
+
+    class Meta:
+        model = User_to_Chat
+        fields = '__all__'
+        read_only_fields = ("id", )
+        # depth = 1

@@ -68,3 +68,37 @@ class ChatViewSet(viewsets.ViewSet):
             User_to_Chat_for_user_1.save()
 
             return Response({'chat': chat.data, 'user_to_chat': User_to_Chat_for_user_1.data})
+
+
+class ChatPkViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated, IsChatOwner]
+
+    def update(self, request, pk=None):
+        instance = Chat.objects.get(pk=pk)
+
+        self.check_object_permissions(self.request, instance)
+
+        serializer = ChatSerializer(data=request.data, instance=instance)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({"update": serializer.data})
+
+    def destroy(self, request, pk=None):
+        chat = Chat.objects.get(pk=pk)
+
+        self.check_object_permissions(self.request, chat)
+        chat.delete()
+
+        return Response({"detail": "Chat was suressful delete"})
+
+
+class ChatRetrivePkViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated, IsChatMember]
+
+    def retrieve(self, request, pk=None):
+        instance = Chat.objects.get(pk=pk)
+
+        self.check_object_permissions(self.request, instance)
+
+        return Response({"user list": User_to_ChatDepthUserSerializer(instance.user_to_chat_set.all(), many=True).data})
