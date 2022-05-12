@@ -1,4 +1,5 @@
 from logging import raiseExceptions
+from re import U
 from tkinter import N
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
@@ -74,7 +75,7 @@ class ChatPkViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated, IsChatOwner]
 
     def update(self, request, pk=None):
-        instance = Chat.objects.get(pk=pk)
+        instance = get_object_or_404(Chat, pk=pk)
 
         self.check_object_permissions(self.request, instance)
 
@@ -85,7 +86,7 @@ class ChatPkViewSet(viewsets.ViewSet):
         return Response({"update": serializer.data})
 
     def destroy(self, request, pk=None):
-        chat = Chat.objects.get(pk=pk)
+        chat = get_object_or_404(Chat, pk=pk)
 
         self.check_object_permissions(self.request, chat)
         chat.delete()
@@ -102,3 +103,26 @@ class ChatRetrivePkViewSet(viewsets.ViewSet):
         self.check_object_permissions(self.request, instance)
 
         return Response({"user list": User_to_ChatDepthUserSerializer(instance.user_to_chat_set.all(), many=True).data})
+
+
+class InvitationCreateViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated, IsChatOwner]
+
+    def create(self, request, pk=None, user=None):
+        user = get_object_or_404(User, pk=user)
+        chat = get_object_or_404(Chat, pk=pk)
+
+        self.check_object_permissions(self.request, chat)
+
+        is_admin = request.data.get('is_admin') in ['true', 'True']
+
+        instanse = User_to_Chat.objects.filter(user=user, chat=chat)
+        if len(instanse) != 0:
+            return Response({"detail": "Юзер уже добавлен"})
+
+        instanse = User_to_Chat(user=user, chat=chat,
+                                is_invitation=True, is_admin=is_admin)
+
+        instanse.save()
+
+        return Response({"user_to_chat": User_to_ChatDepthUserSerializer(instanse).data})

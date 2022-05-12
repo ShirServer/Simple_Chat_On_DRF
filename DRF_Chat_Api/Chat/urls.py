@@ -13,4 +13,7 @@ urlpatterns = [
 
     path('chat/<int:pk>/', ChatRetrivePkViewSet.as_view(
         {'get': 'retrieve', })),  # Получение всей информации об одном чате
+
+    path('invate/<int:pk>/<int:user>', InvitationCreateViewSet.as_view(
+        {'post': 'create', })),  # Создание приглашений в чат если в is_admin не true или True, то False
 ]
