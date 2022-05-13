@@ -16,4 +16,7 @@ urlpatterns = [
 
     path('invate/<int:pk>/<int:user>', InvitationCreateViewSet.as_view(
         {'post': 'create', })),  # Создание приглашений в чат если в is_admin не true или True, то False
+
+    path('invate/answer/<int:pk>', InvitationViewSet.as_view(
+        {'delete': 'destroy', 'put': 'update'})),  # Ответ на приглашение в чат delete-удаляет, put-положительный ответ
 ]

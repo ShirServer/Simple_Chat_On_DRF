@@ -117,7 +117,7 @@ class InvitationCreateViewSet(viewsets.ViewSet):
         is_admin = request.data.get('is_admin') in ['true', 'True']
 
         instanse = User_to_Chat.objects.filter(user=user, chat=chat)
-        if len(instanse) != 0:
+        if instanse.exists():
             return Response({"detail": "Юзер уже добавлен"})
 
         instanse = User_to_Chat(user=user, chat=chat,
@@ -126,3 +126,18 @@ class InvitationCreateViewSet(viewsets.ViewSet):
         instanse.save()
 
         return Response({"user_to_chat": User_to_ChatDepthUserSerializer(instanse).data})
+
+
+class InvitationViewSet(viewsets.ViewSet):
+    def update(self, request, pk=None):
+        user_to_chat = get_object_or_404(
+            Chat, id=pk, user=request.user, is_invitation=True)
+        user_to_chat.ia_invitation = False
+        user_to_chat.save()
+        return Response({"user_to_chat": User_to_ChatDepthUserSerializer(user_to_chat).data})
+
+    def destroy(self, request, pk=None):
+        user_to_chat = User_to_Chat.objects.get(id=pk, user=request.user)
+        chat = get_object_or_404(Chat, id=pk, user=request.user)
+        chat.delete()
+        return Response({"detail": "Вы отвергли преглошение в чат"})
