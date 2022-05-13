@@ -44,5 +44,5 @@ class Message(models.Model):
 
 
 class Message_Files(models.Model):
-    post_id = models.ForeignKey("Message", on_delete=models.CASCADE)
+    message_id = models.ForeignKey("Message", on_delete=models.CASCADE)
     file = models.FileField(upload_to="messages_files/%Y/%m/%d/")
