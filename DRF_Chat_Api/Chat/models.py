@@ -30,3 +30,19 @@ class User_to_Chat(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
     is_admin = models.BooleanField(default=False)
     is_invitation = models.BooleanField(default=False)
+
+
+class Message(models.Model):
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    content = models.TextField(max_length=500)
+    answer = models.ForeignKey("Message", on_delete=models.SET_NULL, null=True)
+    time_created = models.DateTimeField(auto_now_add=True)
+    time_updated = models.DateTimeField(null=True)
+    is_delete = models.BooleanField(default=False)
+
+
+class Message_Files(models.Model):
+    post_id = models.ForeignKey("Message", on_delete=models.CASCADE)
+    file = models.FileField(upload_to="messages_files/%Y/%m/%d/")
