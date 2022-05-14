@@ -56,3 +56,21 @@ class User_to_ChatDepthUserSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ("id", )
         # depth = 1
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    # user = PublicUserSerializer()
+
+    class Meta:
+        model = Message
+        fields = "__all__"
+        read_only_fields = ('id', 'chat', 'author',
+                            'time_created', 'time_updated', 'is_delete')
+        # depth = 1
+
+
+class Message_FilesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message_Files
+        fields = "__all__"
+        read_only_fields = ('id',)
