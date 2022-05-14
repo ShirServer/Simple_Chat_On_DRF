@@ -141,3 +141,25 @@ class InvitationViewSet(viewsets.ViewSet):
         chat = get_object_or_404(Chat, id=pk, user=request.user)
         chat.delete()
         return Response({"detail": "Вы отвергли преглошение в чат"})
+
+
+class MessageViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated, IsChatMember]
+
+    def create(self, request):
+        chat = get_object_or_404(Chat, pk=int(request.data.get('chat')))
+
+        self.check_object_permissions(self.request, chat)
+
+        serializer = MessageSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save(chat=chat, author=request.user)
+
+        for i in request.FILES.getlist('files'):
+            file = Message_FilesSerializer(
+                data={'message_id': serializer.data['id'], 'file': i})
+            file.is_valid(raise_exception=True)
+            file.save()
+
+        return Response({'message': serializer.data})

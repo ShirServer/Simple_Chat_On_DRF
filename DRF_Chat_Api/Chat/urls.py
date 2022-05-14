@@ -19,4 +19,7 @@ urlpatterns = [
 
     path('invate/answer/<int:pk>', InvitationViewSet.as_view(
         {'delete': 'destroy', 'put': 'update'})),  # Ответ на приглашение в чат delete-удаляет, put-положительный ответ
+
+    path('message', MessageViewSet.as_view(
+         {'post': 'create', })),  # Отправка сообщений
 ]
