@@ -22,4 +22,9 @@ urlpatterns = [
 
     path('message', MessageViewSet.as_view(
          {'post': 'create', })),  # Отправка сообщений
+
+    path('message/<int:pk>', MessagePkViewSet.as_view(
+         {'delete': 'destroy', 'put': 'update'})),  # Удаление или редактирование сообщений
+
+
 ]

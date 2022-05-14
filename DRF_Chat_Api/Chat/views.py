@@ -163,3 +163,26 @@ class MessageViewSet(viewsets.ViewSet):
             file.save()
 
         return Response({'message': serializer.data})
+
+
+class MessagePkViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, pk=None):
+        instance = get_object_or_404(
+            Message, id=pk, author=request.user, is_delete=False)
+
+        serializer = MessageSerializer(data=request.data, instance=instance)
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save()
+
+        return Response({'message': serializer.data})
+
+    def destroy(self, request, pk=None):
+        instance = get_object_or_404(
+            Message, id=pk, author=request.user, is_delete=False)
+
+        instance.is_delete = True
+        instance.save()
+        return Response({'detail': "message delete is successfully"})
