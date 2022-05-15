@@ -33,7 +33,7 @@ class ChatViewSet(viewsets.ViewSet):
                 i.chat.avatar = AnoverUserOfPrivateChat.avatar
                 i.chat.name = AnoverUserOfPrivateChat.username
 
-        return Response({"chat_list": User_to_ChatDepthSerializer(User_to_Chats_of_user, many=True).data})
+        return Response({"chats": User_to_ChatDepthSerializer(User_to_Chats_of_user, many=True).data})
 
     def create(self, request):
         chat = ChatSerializer(data=request.data)
@@ -83,7 +83,7 @@ class ChatPkViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response({"update": serializer.data})
+        return Response({"chat": serializer.data})
 
     def destroy(self, request, pk=None):
         chat = get_object_or_404(Chat, pk=pk)
