@@ -107,12 +107,8 @@ class ChatRetrivePkViewSet(viewsets.ViewSet):
 
         messages_of_chat = instance.message_set.filter(is_delete=False,)
 
-        Files_messages_of_chat = []  # Самая костыльная реализация из возможных
-        for i in messages_of_chat:
-            files_of_message = Message_Files.objects.filter(message=i)
-            for j in files_of_message:
-                Files_messages_of_chat.append(j)
-        print(Files_messages_of_chat)
+        Files_messages_of_chat = Message_Files.objects.filter(
+            message__in=messages_of_chat)
 
         return Response({"user_list": User_to_ChatDepthUserSerializer(instance.user_to_chat_set.all(), many=True).data,
                          "messages": MessageDepthSerializer(messages_of_chat, many=True).data,
