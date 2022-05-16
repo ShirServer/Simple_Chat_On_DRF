@@ -1,8 +1,11 @@
+from email import message
+from heapq import merge
 from logging import raiseExceptions
 from re import U
 from tkinter import N
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
+from requests import delete
 from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -102,7 +105,18 @@ class ChatRetrivePkViewSet(viewsets.ViewSet):
 
         self.check_object_permissions(self.request, instance)
 
-        return Response({"user list": User_to_ChatDepthUserSerializer(instance.user_to_chat_set.all(), many=True).data})
+        messages_of_chat = instance.message_set.filter(is_delete=False,)
+
+        Files_messages_of_chat = []  # Самая костыльная реализация из возможных
+        for i in messages_of_chat:
+            files_of_message = Message_Files.objects.filter(message=i)
+            for j in files_of_message:
+                Files_messages_of_chat.append(j)
+        print(Files_messages_of_chat)
+
+        return Response({"user_list": User_to_ChatDepthUserSerializer(instance.user_to_chat_set.all(), many=True).data,
+                         "messages": MessageDepthSerializer(messages_of_chat, many=True).data,
+                        "messages_files": Message_FilesSerializer(Files_messages_of_chat, many=True).data})
 
 
 class InvitationCreateViewSet(viewsets.ViewSet):

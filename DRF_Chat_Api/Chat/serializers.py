@@ -69,6 +69,17 @@ class MessageSerializer(serializers.ModelSerializer):
         # depth = 1
 
 
+class MessageDepthSerializer(serializers.ModelSerializer):
+    author = PublicUserSerializer()
+
+    class Meta:
+        model = Message
+        fields = "__all__"
+        read_only_fields = ('id', 'chat', 'author',
+                            'time_created', 'time_updated', 'is_delete')
+        depth = 10
+
+
 class Message_FilesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message_Files
