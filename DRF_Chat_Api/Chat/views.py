@@ -1,3 +1,4 @@
+from rest_framework.pagination import PageNumberPagination
 from email import message
 from heapq import merge
 from logging import raiseExceptions
@@ -8,13 +9,16 @@ from django.http import HttpResponse, HttpResponseRedirect
 from requests import delete
 from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS, IsAdminUser
 from rest_framework.response import Response
+from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework import viewsets
+from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 
 from .serializers import *
 from .models import *
+from .paginations import *
 
 
 @api_view(['GET'])
@@ -43,7 +47,7 @@ class ChatViewSet(viewsets.ViewSet):
         chat.is_valid(raise_exception=True)
         chat.save()
 
-        if (chat.data["is_private"]):
+        if chat.data["is_private"]:
             with_user = User.objects.filter(
                 username=request.data["with_user"])
             if (len(with_user) == 0):  # private
@@ -101,7 +105,20 @@ class ChatRetrivePkViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated, IsChatMember]
 
     def retrieve(self, request, pk=None):
-        instance = Chat.objects.get(pk=pk)
+        instance = get_object_or_404(Chat, pk=pk)
+
+        self.check_object_permissions(self.request, instance)
+
+        return Response({"user_list": User_to_ChatDepthUserSerializer(instance.user_to_chat_set.all(), many=True).data, })
+
+
+
+class ChatMessagePkViewSet(viewsets.ViewSet):
+    pagination_class = MessagePagination
+    permission_classes = [IsAuthenticated]
+
+    def retrieve(self, request, pk=None):
+        instance = get_object_or_404(Chat, pk=pk)
 
         self.check_object_permissions(self.request, instance)
 
@@ -109,10 +126,9 @@ class ChatRetrivePkViewSet(viewsets.ViewSet):
 
         Files_messages_of_chat = Message_Files.objects.filter(
             message__in=messages_of_chat)
+        return Response({"messages": MessageDepthSerializer(messages_of_chat, many=True).data,
+                         "messages_files": Message_FilesSerializer(Files_messages_of_chat, many=True).data})
 
-        return Response({"user_list": User_to_ChatDepthUserSerializer(instance.user_to_chat_set.all(), many=True).data,
-                         "messages": MessageDepthSerializer(messages_of_chat, many=True).data,
-                        "messages_files": Message_FilesSerializer(Files_messages_of_chat, many=True).data})
 
 
 class InvitationCreateViewSet(viewsets.ViewSet):

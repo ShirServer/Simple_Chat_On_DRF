@@ -14,6 +14,8 @@ urlpatterns = [
     path('chat/<int:pk>/', ChatRetrivePkViewSet.as_view(
         {'get': 'retrieve', })),  # Получение всей информации об одном чате
 
+    path('chat/messages/<int:pk>/', ChatMessagePkViewSet.as_view({'get': 'retrieve'})),  # Получение всех сообщений в одном чате
+
     path('invate/<int:pk>/<int:user>', InvitationCreateViewSet.as_view(
         {'post': 'create', })),  # Создание приглашений в чат если в is_admin не true или True, то False
 
@@ -23,8 +25,7 @@ urlpatterns = [
     path('message', MessageViewSet.as_view(
          {'post': 'create', })),  # Отправка сообщений
 
-    path('message/<int:pk>', MessagePkViewSet.as_view(
-         {'delete': 'destroy', 'put': 'update'})),  # Удаление или редактирование сообщений
+    path('message/<int:pk>', MessagePkViewSet.as_view({'delete': 'destroy', 'put': 'update'}))  # Удаление или редактирование сообщений
 
 
 ]
